@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for serverless note-taking app.
+
+Resources:
+  # NotesTable:
+  #   Type: AWS::DynamoDB::Table
+  #   Properties:
+  #     # Table properties...
+
+  CreateNoteFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: app.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.8
+      Code:
+        S3Bucket: lambda-functions-151118294810
+        S3Key: create_note_lambda.zip
+
+  # NotesApi:
+  #   Type: AWS::ApiGateway::RestApi
+  #   Properties:
+  #     # API Gateway properties...
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Policies:
+        - PolicyName: LambdaDynamoDBPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                  - logs:*
+                Resource: '*'
+
+# Outputs:
+#   NotesApiUrl:
+#     Description: URL of the API Gateway
+#     Value: !Sub 'https://${NotesApi}.execute-api.${AWS::Region}.amazonaws.com/'
